@@ -4,13 +4,13 @@ FROM php:8.4-apache
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
-    libsqlite3-dev \
-    libzip-dev \
-    libicu-dev \
-    && docker-php-ext-install \
-    pdo_sqlite \
-    zip \
-    intl \
+   libpq-dev \
+   libzip-dev \
+   libicu-dev \
+   && docker-php-ext-install \
+   pdo_pgsql \
+   zip \
+   intl \
     && a2enmod rewrite
 
 # Install Composer
