@@ -16,7 +16,7 @@ class AdminUserSeeder extends Seeder
             [
                 'name' => 'System Administrator',
                 'username' => 'admin',
-                'password' => 'Admin123!',
+                'password' => env('ADMIN_PASSWORD'),
                 'role' => 'admin',
             ]
         );
