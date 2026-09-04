@@ -46,4 +46,4 @@ ENV APP_ENV=production
 
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+CMD ["sh", "-c", "php artisan migrate --force && php artisan db:seed --class=AdminUserSeeder --force && apache2-foreground"]
