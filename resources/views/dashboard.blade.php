@@ -3,159 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Dashboard - Simple Login System</title>
 
     <style>
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            margin: 0;
             font-family: Arial, sans-serif;
-            background: #f4f6f8;
-        }
-
-        .navbar {
-            background: #222;
-            color: white;
-            padding: 18px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .navbar h2 {
-            margin: 0;
-        }
-
-        .logout-button {
-            background: #fff;
-            color: #222;
-            border: none;
-            padding: 9px 16px;
-            border-radius: 5px;
-            cursor: pointer;
+            background: #f4f6f9;
+            min-height: 100vh;
+            padding: 40px 20px;
         }
 
         .container {
-            max-width: 900px;
-            margin: 50px auto;
-            padding: 0 20px;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
         }
 
-        .welcome-card {
+        .header {
             background: white;
-            padding: 35px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
 
-        .welcome-card h1 {
-            margin-top: 0;
+        h1 {
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .welcome {
+            color: #666;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 18px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #1f2937;
+            margin-bottom: 20px;
         }
 
         .info {
-            margin-top: 25px;
-            padding: 20px;
-            background: #f4f6f8;
-            border-radius: 8px;
+            display: grid;
+            gap: 15px;
         }
 
-        .info p {
-            margin: 10px 0;
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 14px;
+            background: #f8fafc;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
         }
 
-        .role {
+        .label {
             font-weight: bold;
-            text-transform: capitalize;
+            color: #374151;
         }
 
-        .links {
+        .value {
+            color: #555;
+            text-align: right;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
             margin-top: 25px;
+            flex-wrap: wrap;
         }
 
-        .links a {
-            display: inline-block;
-            margin-right: 10px;
-            padding: 10px 15px;
-            background: #222;
-            color: white;
+        .btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            text-align: center;
             text-decoration: none;
-            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .admin-badge {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 6px 12px;
+            background: #fef3c7;
+            color: #92400e;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .employee-badge {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 6px 12px;
+            background: #dbeafe;
+            color: #1e40af;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
         }
     </style>
 </head>
 
 <body>
 
-<nav class="navbar">
+    <div class="container">
 
-    <h2>Simple Login System</h2>
+        <div class="header">
 
-    <form method="POST" action="/logout">
-        @csrf
+            <h1>Welcome, {{ Auth::user()->name }}!</h1>
 
-        <button type="submit" class="logout-button">
-            Logout
-        </button>
-    </form>
-
-</nav>
-
-<div class="container">
-
-    <div class="welcome-card">
-
-        <h1>Welcome, {{ Auth::user()->name }}!</h1>
-
-        <p>
-            You have successfully logged in to your account.
-        </p>
-
-        <div class="info">
-
-            <p>
-                <strong>Full Name:</strong>
-                {{ Auth::user()->name }}
+            <p class="welcome">
+                You are successfully logged in to the system.
             </p>
-
-            <p>
-                <strong>Username:</strong>
-                {{ Auth::user()->username }}
-            </p>
-
-            <p>
-                <strong>Email:</strong>
-                {{ Auth::user()->email }}
-            </p>
-
-            <p>
-                <strong>Role:</strong>
-                <span class="role">
-                    {{ Auth::user()->role }}
-                </span>
-            </p>
-
-        </div>
-
-        <div class="links">
-
-            <a href="/profile">
-                My Profile
-            </a>
 
             @if (Auth::user()->role === 'admin')
-                <a href="/admin">
-                    Admin Panel
-                </a>
+                <span class="admin-badge">
+                    Administrator
+                </span>
+            @else
+                <span class="employee-badge">
+                    Employee
+                </span>
             @endif
 
         </div>
 
-    </div>
+        <div class="card">
 
-</div>
+            <h2>Account Information</h2>
+
+            <div class="info">
+
+                <div class="info-row">
+                    <span class="label">Full Name</span>
+
+                    <span class="value">
+                        {{ Auth::user()->name }}
+                    </span>
+                </div>
+
+                <div class="info-row">
+                    <span class="label">Employee ID</span>
+
+                    <span class="value">
+                        {{ Auth::user()->employee_id ?? 'N/A' }}
+                    </span>
+                </div>
+
+                <div class="info-row">
+                    <span class="label">Branch</span>
+
+                    <span class="value">
+                        {{ Auth::user()->branch ?? 'N/A' }}
+                    </span>
+                </div>
+
+                <div class="info-row">
+                    <span class="label">Role</span>
+
+                    <span class="value">
+                        {{ Auth::user()->role === 'admin' ? 'Administrator' : 'Employee' }}
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="buttons">
+
+                <a href="/profile" class="btn btn-primary">
+                    My Profile
+                </a>
+
+                @if (Auth::user()->role === 'admin')
+                    <a href="/admin" class="btn btn-secondary">
+                        Admin Panel
+                    </a>
+                @endif
+
+                <form method="POST" action="/logout" style="flex: 1; min-width: 150px;">
+
+                    @csrf
+
+                    <button type="submit" class="btn btn-danger" style="width: 100%;">
+                        Logout
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </body>
 </html>

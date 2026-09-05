@@ -101,6 +101,27 @@
             font-weight: bold;
             text-decoration: none;
         }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        .admin-link {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .admin-link a {
+            color: #222;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .admin-link a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 
@@ -108,11 +129,23 @@
 
 <div class="container">
 
-    <h1>Welcome Back</h1>
+    <h1>Welcome</h1>
 
     <p class="subtitle">
         Sign in to your account
     </p>
+
+    @if (session('success'))
+        <div style="
+            background: #e5f7e5;
+            color: #176b17;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        ">
+            {{ session('success') }}
+        </div>
+    @endif
 
     @if ($errors->any())
         <div class="errors">
@@ -161,6 +194,10 @@
     <div class="register-link">
         Don't have an account?
         <a href="/register">Create an account</a>
+    </div>
+
+    <div class="admin-link">
+        <a href="/admin/login">Admin Login</a>
     </div>
 
 </div>

@@ -37,8 +37,12 @@
             margin-left: 20px;
         }
 
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
         .container {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 40px auto;
             padding: 0 20px;
         }
@@ -67,6 +71,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 850px;
         }
 
         th,
@@ -79,6 +84,11 @@
         th {
             background: #f1f3f5;
             font-weight: bold;
+            color: #374151;
+        }
+
+        tr:hover {
+            background: #f8fafc;
         }
 
         .role {
@@ -110,6 +120,29 @@
             margin-top: 20px;
             text-decoration: none;
             color: #2563eb;
+            font-weight: bold;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+
+        .logout-form {
+            display: inline;
+        }
+
+        .logout-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-left: 20px;
+            padding: 0;
+        }
+
+        .logout-button:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -117,18 +150,38 @@
 <body>
 
     <div class="navbar">
+
         <h2>Simple Login System</h2>
 
         <div>
             <a href="/dashboard">Dashboard</a>
+
+            <form
+                method="POST"
+                action="/logout"
+                class="logout-form"
+            >
+                @csrf
+
+                <button
+                    type="submit"
+                    class="logout-button"
+                >
+                    Logout
+                </button>
+            </form>
         </div>
+
     </div>
 
     <div class="container">
 
         <div class="header">
             <h1>Admin Panel</h1>
-            <p>Manage and review registered user accounts.</p>
+
+            <p>
+                Manage and review registered employee accounts.
+            </p>
         </div>
 
         <div class="card">
@@ -136,10 +189,13 @@
             @if ($users->count() > 0)
 
                 <table>
+
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Full Name</th>
+                            <th>Employee ID</th>
+                            <th>Branch</th>
                             <th>Username</th>
                             <th>Email</th>
                             <th>Role</th>
@@ -148,30 +204,63 @@
                     </thead>
 
                     <tbody>
+
                         @foreach ($users as $user)
+
                             <tr>
-                                <td>{{ $user->id }}</td>
-
-                                <td>{{ $user->name }}</td>
-
-                                <td>{{ $user->username }}</td>
-
-                                <td>{{ $user->email }}</td>
 
                                 <td>
+                                    {{ $user->id }}
+                                </td>
+
+                                <td>
+                                    {{ $user->name }}
+                                </td>
+
+                                <td>
+                                    {{ $user->employee_id ?? 'N/A' }}
+                                </td>
+
+                                <td>
+                                    {{ $user->branch ?? 'N/A' }}
+                                </td>
+
+                                <td>
+                                    {{ $user->username }}
+                                </td>
+
+                                <td>
+                                    {{ $user->email }}
+                                </td>
+
+                                <td>
+
                                     @if ($user->role === 'admin')
-                                        <span class="role admin">Administrator</span>
+
+                                        <span class="role admin">
+                                            Administrator
+                                        </span>
+
                                     @else
-                                        <span class="role user">Regular User</span>
+
+                                        <span class="role user">
+                                            Employee
+                                        </span>
+
                                     @endif
+
                                 </td>
 
                                 <td>
                                     {{ $user->created_at->format('M d, Y') }}
                                 </td>
+
                             </tr>
+
                         @endforeach
+
                     </tbody>
+
                 </table>
 
             @else
@@ -184,7 +273,9 @@
 
         </div>
 
-        <a href="/dashboard" class="back">← Back to Dashboard</a>
+        <a href="/dashboard" class="back">
+            ← Back to Dashboard
+        </a>
 
     </div>
 

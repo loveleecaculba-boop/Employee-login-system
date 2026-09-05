@@ -55,17 +55,26 @@
             color: #374151;
         }
 
-        input {
+        input,
+        select {
             width: 100%;
             padding: 12px;
             border: 1px solid #ccc;
             border-radius: 6px;
             font-size: 15px;
+            background: white;
         }
 
-        input:focus {
+        input:focus,
+        select:focus {
             outline: none;
             border-color: #2563eb;
+        }
+
+        .employee-note {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #666;
         }
 
         .password-requirements {
@@ -106,6 +115,15 @@
 
         .error-box li {
             margin-bottom: 4px;
+        }
+
+        .success-box {
+            background: #dcfce7;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
         }
 
         button {
@@ -149,7 +167,7 @@
         <h1>Create Account</h1>
 
         <p class="subtitle">
-            Register a new account to access the system.
+            Register as an employee to access the system.
         </p>
 
         @if ($errors->any())
@@ -162,10 +180,17 @@
             </div>
         @endif
 
+        @if (session('success'))
+            <div class="success-box">
+                {{ session('success') }}
+            </div>
+        @endif
+
         <form method="POST" action="/register">
 
             @csrf
 
+            <!-- Full Name -->
             <div class="form-group">
                 <label for="name">Full Name</label>
 
@@ -174,10 +199,67 @@
                     id="name"
                     name="name"
                     value="{{ old('name') }}"
+                    placeholder="Enter your full name"
                     required
                 >
             </div>
 
+            <!-- Employee ID -->
+            <div class="form-group">
+                <label for="employee_id">Employee ID Number</label>
+
+                <input
+                    type="text"
+                    id="employee_id"
+                    name="employee_id"
+                    value="{{ old('employee_id') }}"
+                    placeholder="XX-XXXXXX"
+                    pattern="[0-9]{2}-[0-9]{6}"
+                    maxlength="9"
+                    inputmode="numeric"
+                    required
+                >
+
+                <p class="employee-note">
+                    Format: 2 numbers - 6 numbers (example: 12-345678)
+                </p>
+            </div>
+
+            <!-- Branch -->
+            <div class="form-group">
+                <label for="branch">Branch</label>
+
+                <select
+                    id="branch"
+                    name="branch"
+                    required
+                >
+                    <option value="">Select your branch</option>
+
+                    <option
+                        value="Pasig"
+                        {{ old('branch') == 'Pasig' ? 'selected' : '' }}
+                    >
+                        Pasig
+                    </option>
+
+                    <option
+                        value="Mandaluyong"
+                        {{ old('branch') == 'Mandaluyong' ? 'selected' : '' }}
+                    >
+                        Mandaluyong
+                    </option>
+
+                    <option
+                        value="Manila"
+                        {{ old('branch') == 'Manila' ? 'selected' : '' }}
+                    >
+                        Manila
+                    </option>
+                </select>
+            </div>
+
+            <!-- Username -->
             <div class="form-group">
                 <label for="username">Username</label>
 
@@ -186,10 +268,12 @@
                     id="username"
                     name="username"
                     value="{{ old('username') }}"
+                    placeholder="Enter your username"
                     required
                 >
             </div>
 
+            <!-- Email -->
             <div class="form-group">
                 <label for="email">Email Address</label>
 
@@ -198,10 +282,12 @@
                     id="email"
                     name="email"
                     value="{{ old('email') }}"
+                    placeholder="Enter your email"
                     required
                 >
             </div>
 
+            <!-- Password -->
             <div class="form-group">
                 <label for="password">Password</label>
 
@@ -209,6 +295,7 @@
                     type="password"
                     id="password"
                     name="password"
+                    placeholder="Enter your password"
                     required
                 >
 
@@ -224,6 +311,7 @@
                 </div>
             </div>
 
+            <!-- Confirm Password -->
             <div class="form-group">
                 <label for="password_confirmation">Confirm Password</label>
 
@@ -231,10 +319,12 @@
                     type="password"
                     id="password_confirmation"
                     name="password_confirmation"
+                    placeholder="Re-enter your password"
                     required
                 >
             </div>
 
+            <!-- Submit -->
             <button type="submit">
                 Create Account
             </button>
