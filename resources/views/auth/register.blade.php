@@ -72,12 +72,7 @@
             border-color: #2563eb;
         }
 
-        .employee-note,
-        .name-note {
-            margin-top: 6px;
-            font-size: 13px;
-            color: #666;
-        }
+
 
         .password-requirements {
             background: #f8fafc;
@@ -208,10 +203,7 @@
                     required
                 >
 
-                <p class="name-note">
-                    Letters only. Spaces, periods, apostrophes, and hyphens are allowed.
-                </p>
-
+    
             </div>
 
             <!-- Employee ID -->
