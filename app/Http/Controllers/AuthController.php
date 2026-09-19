@@ -32,9 +32,19 @@ class AuthController extends Controller
                 Rule::in(['Pasig', 'Mandaluyong', 'Manila']),
             ],
 
-            'username' => 'required|string|max:50|unique:users,username',
+            'username' => [
+                'required',
+                'string',
+                'max:50',
+                'unique:users,username',
+            ],
 
-            'email' => 'required|email|max:255|unique:users,email',
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                'unique:users,email',
+            ],
 
             'password' => [
                 'required',
@@ -87,6 +97,16 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Employee Login
+    |--------------------------------------------------------------------------
+    |
+    | Only accounts with role = user can log in here.
+    | Administrator accounts must use the dedicated Admin Login page.
+    |
+    */
+
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -94,13 +114,17 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $loginField = filter_var($credentials['login'], FILTER_VALIDATE_EMAIL)
+        $loginField = filter_var(
+            $credentials['login'],
+            FILTER_VALIDATE_EMAIL
+        )
             ? 'email'
             : 'username';
 
         if (Auth::attempt([
             $loginField => $credentials['login'],
             'password' => $credentials['password'],
+            'role' => 'user',
         ])) {
 
             $request->session()->regenerate();
@@ -108,7 +132,7 @@ class AuthController extends Controller
             AuditLog::create([
                 'user_id' => Auth::id(),
                 'action' => 'login',
-                'description' => 'User successfully logged in.',
+                'description' => 'Employee successfully logged in.',
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
@@ -116,15 +140,20 @@ class AuthController extends Controller
             return redirect('/dashboard');
         }
 
-        return back()->withErrors([
-            'login' => 'The provided credentials are incorrect.',
-        ])->onlyInput('login');
+        return back()
+            ->withErrors([
+                'login' => 'Invalid employee credentials.',
+            ])
+            ->onlyInput('login');
     }
 
     /*
     |--------------------------------------------------------------------------
     | Admin Login
     |--------------------------------------------------------------------------
+    |
+    | Only accounts with role = admin can log in here.
+    |
     */
 
     public function showAdminLogin()
@@ -139,7 +168,10 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $loginField = filter_var($credentials['login'], FILTER_VALIDATE_EMAIL)
+        $loginField = filter_var(
+            $credentials['login'],
+            FILTER_VALIDATE_EMAIL
+        )
             ? 'email'
             : 'username';
 
@@ -162,10 +194,18 @@ class AuthController extends Controller
             return redirect('/admin');
         }
 
-        return back()->withErrors([
-            'login' => 'Invalid administrator credentials.',
-        ])->onlyInput('login');
+        return back()
+            ->withErrors([
+                'login' => 'Invalid administrator credentials.',
+            ])
+            ->onlyInput('login');
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Logout
+    |--------------------------------------------------------------------------
+    */
 
     public function logout(Request $request)
     {
