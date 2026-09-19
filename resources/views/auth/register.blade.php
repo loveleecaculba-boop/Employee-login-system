@@ -72,12 +72,7 @@
             border-color: #2563eb;
         }
 
-        .employee-note {
-            margin-top: 6px;
-            font-size: 13px;
-            color: #666;
-        }
-
+        .employee-note,
         .name-note {
             margin-top: 6px;
             font-size: 13px;
@@ -209,8 +204,8 @@
                     value="{{ old('name') }}"
                     placeholder="Enter your full name"
                     maxlength="255"
-                    pattern="[A-Za-zÀ-ÖØ-öø-ÿÑñ]+([ .'-][A-Za-zÀ-ÖØ-öø-ÿÑñ]+)*"
-                    title="Full Name must contain letters only."
+                    pattern="[A-Za-zÀ-ÖØ-öø-ÿÑñ]+([ .'-][A-Za-zÀ-ÖØ-öø-ÿÑñ]+)*\.?"
+                    title="Full Name must contain letters. Spaces, periods, apostrophes, and hyphens are allowed."
                     autocomplete="name"
                     required
                 >
@@ -276,7 +271,6 @@
                     >
                         Manila
                     </option>
-
                 </select>
 
             </div>

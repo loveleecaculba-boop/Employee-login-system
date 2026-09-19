@@ -28,7 +28,7 @@ class AuthController extends Controller
                 'required',
                 'string',
                 'max:255',
-                'regex:/^[\pL]+(?:[ .\'-][\pL]+)*$/u',
+                'regex:/^[\pL]+(?:[ .\'-][\pL]+)*\.?$/u',
             ],
 
             'employee_id' => [
