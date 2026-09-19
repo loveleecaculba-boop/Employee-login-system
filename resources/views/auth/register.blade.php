@@ -204,8 +204,6 @@
                     value="{{ old('name') }}"
                     placeholder="Enter your full name"
                     maxlength="255"
-                    pattern="[A-Za-zÀ-ÖØ-öø-ÿÑñ]+([ .'-][A-Za-zÀ-ÖØ-öø-ÿÑñ]+)*\.?"
-                    title="Full Name must contain letters. Spaces, periods, apostrophes, and hyphens are allowed."
                     autocomplete="name"
                     required
                 >
@@ -383,6 +381,16 @@
 
         fullNameInput.addEventListener('input', function () {
 
+            /*
+             * Allow:
+             * Letters
+             * Spaces
+             * Periods
+             * Apostrophes
+             * Hyphens
+             *
+             * Remove numbers and other special characters.
+             */
             this.value = this.value.replace(
                 /[^A-Za-zÀ-ÖØ-öø-ÿÑñ .'-]/g,
                 ''
