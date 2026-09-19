@@ -15,10 +15,21 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Employee Registration
+    |--------------------------------------------------------------------------
+    */
+
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[\pL]+(?:[ .\'-][\pL]+)*$/u',
+            ],
 
             'employee_id' => [
                 'required',
@@ -56,12 +67,22 @@ class AuthController extends Controller
                 'regex:/[0-9]/',
             ],
         ], [
+            'name.required' => 'Full Name is required.',
+            'name.regex' => 'Full Name must contain letters only.',
+
             'employee_id.required' => 'Employee ID is required.',
             'employee_id.regex' => 'Employee ID must follow the format XX-XXXXXX using numbers only.',
             'employee_id.unique' => 'This Employee ID is already registered.',
 
             'branch.required' => 'Branch is required.',
             'branch.in' => 'Please select a valid branch: Pasig, Mandaluyong, or Manila.',
+
+            'username.required' => 'Username is required.',
+            'username.unique' => 'This username is already registered.',
+
+            'email.required' => 'Email is required.',
+            'email.email' => 'Please enter a valid email address.',
+            'email.unique' => 'This email is already registered.',
 
             'password.min' => 'Password must be at least 8 characters.',
             'password.confirmed' => 'Password confirmation does not match.',
@@ -78,6 +99,12 @@ class AuthController extends Controller
             'role' => 'user',
         ]);
 
+        /*
+        |--------------------------------------------------------------------------
+        | Audit Log - Registration
+        |--------------------------------------------------------------------------
+        */
+
         AuditLog::create([
             'user_id' => $user->id,
             'action' => 'registration',
@@ -92,20 +119,20 @@ class AuthController extends Controller
         );
     }
 
-    public function showLogin()
-    {
-        return view('auth.login');
-    }
-
     /*
     |--------------------------------------------------------------------------
     | Employee Login
     |--------------------------------------------------------------------------
     |
     | Only accounts with role = user can log in here.
-    | Administrator accounts must use the dedicated Admin Login page.
+    | Administrator accounts must use the Admin Login page.
     |
     */
+
+    public function showLogin()
+    {
+        return view('auth.login');
+    }
 
     public function login(Request $request)
     {
@@ -128,6 +155,12 @@ class AuthController extends Controller
         ])) {
 
             $request->session()->regenerate();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Audit Log - Employee Login
+            |--------------------------------------------------------------------------
+            */
 
             AuditLog::create([
                 'user_id' => Auth::id(),
@@ -183,6 +216,12 @@ class AuthController extends Controller
 
             $request->session()->regenerate();
 
+            /*
+            |--------------------------------------------------------------------------
+            | Audit Log - Admin Login
+            |--------------------------------------------------------------------------
+            */
+
             AuditLog::create([
                 'user_id' => Auth::id(),
                 'action' => 'admin_login',
@@ -211,6 +250,12 @@ class AuthController extends Controller
     {
         $user = Auth::user();
 
+        /*
+        |--------------------------------------------------------------------------
+        | Audit Log - Logout
+        |--------------------------------------------------------------------------
+        */
+
         if ($user) {
             AuditLog::create([
                 'user_id' => $user->id,
@@ -222,6 +267,12 @@ class AuthController extends Controller
         }
 
         Auth::logout();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Secure Session Termination
+        |--------------------------------------------------------------------------
+        */
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -72,6 +73,12 @@
         }
 
         .employee-note {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .name-note {
             margin-top: 6px;
             font-size: 13px;
             color: #666;
@@ -192,6 +199,7 @@
 
             <!-- Full Name -->
             <div class="form-group">
+
                 <label for="name">Full Name</label>
 
                 <input
@@ -200,12 +208,22 @@
                     name="name"
                     value="{{ old('name') }}"
                     placeholder="Enter your full name"
+                    maxlength="255"
+                    pattern="[A-Za-zÀ-ÖØ-öø-ÿÑñ]+([ .'-][A-Za-zÀ-ÖØ-öø-ÿÑñ]+)*"
+                    title="Full Name must contain letters only."
+                    autocomplete="name"
                     required
                 >
+
+                <p class="name-note">
+                    Letters only. Spaces, periods, apostrophes, and hyphens are allowed.
+                </p>
+
             </div>
 
             <!-- Employee ID -->
             <div class="form-group">
+
                 <label for="employee_id">Employee ID Number</label>
 
                 <input
@@ -223,10 +241,12 @@
                 <p class="employee-note">
                     Format: 2 numbers - 6 numbers (example: 12-345678)
                 </p>
+
             </div>
 
             <!-- Branch -->
             <div class="form-group">
+
                 <label for="branch">Branch</label>
 
                 <select
@@ -256,11 +276,14 @@
                     >
                         Manila
                     </option>
+
                 </select>
+
             </div>
 
             <!-- Username -->
             <div class="form-group">
+
                 <label for="username">Username</label>
 
                 <input
@@ -269,12 +292,16 @@
                     name="username"
                     value="{{ old('username') }}"
                     placeholder="Enter your username"
+                    maxlength="50"
+                    autocomplete="username"
                     required
                 >
+
             </div>
 
             <!-- Email -->
             <div class="form-group">
+
                 <label for="email">Email Address</label>
 
                 <input
@@ -283,12 +310,16 @@
                     name="email"
                     value="{{ old('email') }}"
                     placeholder="Enter your email"
+                    maxlength="255"
+                    autocomplete="email"
                     required
                 >
+
             </div>
 
             <!-- Password -->
             <div class="form-group">
+
                 <label for="password">Password</label>
 
                 <input
@@ -296,10 +327,12 @@
                     id="password"
                     name="password"
                     placeholder="Enter your password"
+                    autocomplete="new-password"
                     required
                 >
 
                 <div class="password-requirements">
+
                     <p>Password must:</p>
 
                     <ul>
@@ -308,20 +341,27 @@
                         <li>Contain at least one lowercase letter</li>
                         <li>Contain at least one number</li>
                     </ul>
+
                 </div>
+
             </div>
 
             <!-- Confirm Password -->
             <div class="form-group">
-                <label for="password_confirmation">Confirm Password</label>
+
+                <label for="password_confirmation">
+                    Confirm Password
+                </label>
 
                 <input
                     type="password"
                     id="password_confirmation"
                     name="password_confirmation"
                     placeholder="Re-enter your password"
+                    autocomplete="new-password"
                     required
                 >
+
             </div>
 
             <!-- Submit -->
@@ -332,11 +372,31 @@
         </form>
 
         <div class="login-link">
+
             Already have an account?
-            <a href="/login">Sign in here</a>
+
+            <a href="/login">
+                Sign in here
+            </a>
+
         </div>
 
     </div>
 
+    <!-- Full Name Input Restriction -->
+    <script>
+        const fullNameInput = document.getElementById('name');
+
+        fullNameInput.addEventListener('input', function () {
+
+            this.value = this.value.replace(
+                /[^A-Za-zÀ-ÖØ-öø-ÿÑñ .'-]/g,
+                ''
+            );
+
+        });
+    </script>
+
 </body>
+
 </html>
