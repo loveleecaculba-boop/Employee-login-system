@@ -15,12 +15,6 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Employee Registration
-    |--------------------------------------------------------------------------
-    */
-
     public function register(Request $request)
     {
         $request->validate([
@@ -30,33 +24,28 @@ class AuthController extends Controller
                 'max:255',
                 'regex:/^[\pL]+(?:[ .\'-][\pL]+)*\.?$/u',
             ],
-
             'employee_id' => [
                 'required',
                 'string',
                 'regex:/^[0-9]{2}-[0-9]{6}$/',
                 'unique:users,employee_id',
             ],
-
             'branch' => [
                 'required',
                 Rule::in(['Pasig', 'Mandaluyong', 'Manila']),
             ],
-
             'username' => [
                 'required',
                 'string',
                 'max:50',
                 'unique:users,username',
             ],
-
             'email' => [
                 'required',
                 'email',
                 'max:255',
                 'unique:users,email',
             ],
-
             'password' => [
                 'required',
                 'string',
@@ -69,21 +58,16 @@ class AuthController extends Controller
         ], [
             'name.required' => 'Full Name is required.',
             'name.regex' => 'Full Name must contain letters only.',
-
             'employee_id.required' => 'Employee ID is required.',
             'employee_id.regex' => 'Employee ID must follow the format XX-XXXXXX using numbers only.',
             'employee_id.unique' => 'This Employee ID is already registered.',
-
             'branch.required' => 'Branch is required.',
             'branch.in' => 'Please select a valid branch: Pasig, Mandaluyong, or Manila.',
-
             'username.required' => 'Username is required.',
             'username.unique' => 'This username is already registered.',
-
             'email.required' => 'Email is required.',
             'email.email' => 'Please enter a valid email address.',
             'email.unique' => 'This email is already registered.',
-
             'password.min' => 'Password must be at least 8 characters.',
             'password.confirmed' => 'Password confirmation does not match.',
             'password.regex' => 'Password must contain at least one uppercase letter, one lowercase letter, and one number.',
@@ -99,12 +83,6 @@ class AuthController extends Controller
             'role' => 'user',
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Audit Log - Registration
-        |--------------------------------------------------------------------------
-        */
-
         AuditLog::create([
             'user_id' => $user->id,
             'action' => 'registration',
@@ -119,21 +97,15 @@ class AuthController extends Controller
         );
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Employee Login
-    |--------------------------------------------------------------------------
-    |
-    | Only accounts with role = user can log in here.
-    | Administrator accounts must use the Admin Login page.
-    |
-    */
-
     public function showLogin()
     {
         return view('auth.login');
     }
 
+    /**
+     * Authenticate both employees and administrators
+     * through the same login form.
+     */
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -144,117 +116,70 @@ class AuthController extends Controller
         $loginField = filter_var(
             $credentials['login'],
             FILTER_VALIDATE_EMAIL
-        )
-            ? 'email'
-            : 'username';
+        ) ? 'email' : 'username';
 
-        if (Auth::attempt([
+        if (!Auth::attempt([
             $loginField => $credentials['login'],
             'password' => $credentials['password'],
-            'role' => 'user',
         ])) {
-
-            $request->session()->regenerate();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Audit Log - Employee Login
-            |--------------------------------------------------------------------------
-            */
-
-            AuditLog::create([
-                'user_id' => Auth::id(),
-                'action' => 'login',
-                'description' => 'Employee successfully logged in.',
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
-
-            return redirect('/dashboard');
+            return back()
+                ->withErrors([
+                    'login' => 'Invalid username/email or password.',
+                ])
+                ->onlyInput('login');
         }
 
-        return back()
-            ->withErrors([
-                'login' => 'Invalid employee credentials.',
-            ])
-            ->onlyInput('login');
+        $request->session()->regenerate();
+
+        $user = Auth::user();
+
+        if ($user->role === 'admin') {
+            $action = 'admin_login';
+            $description = 'Administrator successfully logged in.';
+            $destination = '/dashboard';
+        } elseif ($user->role === 'user') {
+            $action = 'login';
+            $description = 'Employee successfully logged in.';
+            $destination = '/dashboard';
+        } else {
+            Auth::logout();
+
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect('/login')->withErrors([
+                'login' => 'Your account role is not recognized.',
+            ]);
+        }
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => $action,
+            'description' => $description,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return redirect($destination);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Admin Login
-    |--------------------------------------------------------------------------
-    |
-    | Only accounts with role = admin can log in here.
-    |
-    */
-
+    /**
+     * Keep the old admin login endpoint compatible
+     * while directing it to the shared login page.
+     */
     public function showAdminLogin()
     {
-        return view('auth.admin-login');
+        return redirect('/login');
     }
 
     public function adminLogin(Request $request)
     {
-        $credentials = $request->validate([
-            'login' => 'required|string',
-            'password' => 'required|string',
-        ]);
-
-        $loginField = filter_var(
-            $credentials['login'],
-            FILTER_VALIDATE_EMAIL
-        )
-            ? 'email'
-            : 'username';
-
-        if (Auth::attempt([
-            $loginField => $credentials['login'],
-            'password' => $credentials['password'],
-            'role' => 'admin',
-        ])) {
-
-            $request->session()->regenerate();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Audit Log - Admin Login
-            |--------------------------------------------------------------------------
-            */
-
-            AuditLog::create([
-                'user_id' => Auth::id(),
-                'action' => 'admin_login',
-                'description' => 'Administrator successfully logged in.',
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
-
-            return redirect('/admin');
-        }
-
-        return back()
-            ->withErrors([
-                'login' => 'Invalid administrator credentials.',
-            ])
-            ->onlyInput('login');
+        return $this->login($request);
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Logout
-    |--------------------------------------------------------------------------
-    */
 
     public function logout(Request $request)
     {
         $user = Auth::user();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Audit Log - Logout
-        |--------------------------------------------------------------------------
-        */
 
         if ($user) {
             AuditLog::create([
@@ -267,12 +192,6 @@ class AuthController extends Controller
         }
 
         Auth::logout();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Secure Session Termination
-        |--------------------------------------------------------------------------
-        */
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
