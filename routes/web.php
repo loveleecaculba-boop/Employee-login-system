@@ -10,6 +10,7 @@ Route::get('/', function () {
     return redirect('/login');
 });
 
+// Guest Routes
 Route::middleware('guest')->group(function () {
 
     // Employee Registration
@@ -18,13 +19,13 @@ Route::middleware('guest')->group(function () {
 
     Route::post('/register', [AuthController::class, 'register']);
 
-    // Shared Admin and Employee Login
+    // Employee Login
     Route::get('/login', [AuthController::class, 'showLogin'])
         ->name('login');
 
     Route::post('/login', [AuthController::class, 'login']);
 
-    // Legacy Admin Login
+    // Admin Login
     Route::get('/admin/login', [AuthController::class, 'showAdminLogin'])
         ->name('admin.login');
 
@@ -45,24 +46,30 @@ Route::middleware('guest')->group(function () {
         ->name('password.update');
 });
 
+// Authenticated Routes
 Route::middleware('auth')->group(function () {
 
-    // Shared Admin and Employee Dashboard
+    // Employee Dashboard
     Route::get('/dashboard', function () {
         return view('dashboard');
     });
 
-    // Profile
+    // Employee Profile
     Route::get('/profile', [ProfileController::class, 'show']);
+
     Route::put('/profile', [ProfileController::class, 'update']);
 
-    // Employee Password Change
     Route::post('/profile/change-password', [ProfileController::class, 'changePassword'])
         ->name('profile.password.update');
 
     // Admin Panel
     Route::get('/admin', [AdminController::class, 'index'])
         ->middleware('admin');
+
+    // Admin Activity Logs
+    Route::get('/admin/activity-logs', [AdminController::class, 'activityLogs'])
+        ->middleware('admin')
+        ->name('admin.activity-logs');
 
     // Logout
     Route::post('/logout', [AuthController::class, 'logout']);

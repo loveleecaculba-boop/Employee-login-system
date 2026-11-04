@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -112,6 +114,20 @@ class PasswordResetController extends Controller
         if (!$updated) {
             return back()->withErrors([
                 'email' => 'Unable to reset the password. Please try again.',
+            ]);
+        }
+
+        // Retrieve the account for audit logging.
+        $user = User::where('email', $request->email)->first();
+
+        // Record the successful password reset.
+        if ($user) {
+            AuditLog::create([
+                'user_id' => $user->id,
+                'action' => 'password_reset',
+                'description' => 'User successfully reset their password.',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
             ]);
         }
 

@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Admin Panel - INCS</title>
 
     <style>
@@ -376,6 +375,10 @@
         <nav class="nav-actions" aria-label="Main navigation">
             <a href="/dashboard" class="nav-link">Dashboard</a>
 
+            <a href="/admin/activity-logs" class="nav-link">
+                Activity Logs
+            </a>
+
             <form method="POST" action="/logout" class="logout-form">
                 @csrf
 
@@ -411,9 +414,9 @@
                 </p>
             </div>
 
-<div class="summary-icon" aria-hidden="true">
-    👥
-</div>
+            <div class="summary-icon" aria-hidden="true">
+                👥
+            </div>
         </section>
 
         <!-- REGISTERED ACCOUNTS TABLE -->
