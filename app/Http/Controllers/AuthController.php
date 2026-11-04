@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
@@ -103,8 +105,12 @@ class AuthController extends Controller
     }
 
     /**
-     * Authenticate both employees and administrators
-     * through the same login form.
+     * Authenticate employees and administrators.
+     *
+     * Security:
+     * - Maximum of 5 failed attempts.
+     * - 15-minute lockout after the fifth failed attempt.
+     * - Counter resets after successful authentication.
      */
     public function login(Request $request)
     {
@@ -113,22 +119,77 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
+        $maxAttempts = 5;
+        $decaySeconds = 900; // 15 minutes
+
+        // Normalize the username or email for rate limiting
+        $normalizedLogin = Str::lower(trim($credentials['login']));
+
+        // Generate separate keys for failed attempts and lockout
+        $identifier = hash('sha256', $normalizedLogin . '|' . $request->ip());
+
+        $attemptKey = 'login_attempts:' . $identifier;
+        $lockKey = 'login_lockout:' . $identifier;
+
+        // Check whether the login is currently locked
+        if (RateLimiter::tooManyAttempts($lockKey, 1)) {
+            $seconds = RateLimiter::availableIn($lockKey);
+            $minutes = ceil($seconds / 60);
+
+            return back()
+                ->withErrors([
+                    'login' => "Your login is temporarily locked due to too many failed attempts. Please try again in {$minutes} minute(s).",
+                ])
+                ->onlyInput('login');
+        }
+
+        // Determine whether the login input is an email or username
         $loginField = filter_var(
             $credentials['login'],
             FILTER_VALIDATE_EMAIL
         ) ? 'email' : 'username';
 
+        // Attempt authentication
         if (!Auth::attempt([
             $loginField => $credentials['login'],
             'password' => $credentials['password'],
         ])) {
+
+            // Record the failed attempt
+            RateLimiter::hit($attemptKey, $decaySeconds);
+
+            $attempts = RateLimiter::attempts($attemptKey);
+
+            // Lock the login for 15 minutes after the fifth failure
+            if ($attempts >= $maxAttempts) {
+
+                // Clear the previous attempt counter
+                RateLimiter::clear($attemptKey);
+
+                // Start a fresh 15-minute lockout from the fifth failure
+                RateLimiter::hit($lockKey, $decaySeconds);
+
+                return back()
+                    ->withErrors([
+                        'login' => 'You have reached the maximum of 5 failed login attempts. Your login is temporarily locked for 15 minutes. Please try again later.',
+                    ])
+                    ->onlyInput('login');
+            }
+
+            $remainingAttempts = $maxAttempts - $attempts;
+
             return back()
                 ->withErrors([
-                    'login' => 'Invalid username/email or password.',
+                    'login' => "Invalid username/email or password. {$remainingAttempts} attempt(s) remaining.",
                 ])
                 ->onlyInput('login');
         }
 
+        // Reset failed attempts after successful authentication
+        RateLimiter::clear($attemptKey);
+        RateLimiter::clear($lockKey);
+
+        // Regenerate the session after successful login
         $request->session()->regenerate();
 
         $user = Auth::user();
@@ -152,6 +213,7 @@ class AuthController extends Controller
             ]);
         }
 
+        // Record successful login in the audit logs
         AuditLog::create([
             'user_id' => $user->id,
             'action' => $action,
